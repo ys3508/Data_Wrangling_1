@@ -19,5 +19,24 @@ litters_df = janitor::clean_names(litters_df)
 
 ```
 
+##  Take a look at the data
+
+printing in the console.
+
+```{r}
+litters_df
+
+```
+
+```{r}
+tail(litters_df)
+```
+
+
+```{r}
+# check the missing value/mean / histogram/ distribution
+skimr::skim(litters_df)
+```
+
 
 
