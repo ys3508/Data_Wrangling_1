@@ -71,7 +71,7 @@ pulse_df
 ## comparison with Base R
 
 what about 'read.csv' .. ?
-read_csv vs. read.csv
+read_csv vs. read.csv (use read_csv--> better)
 
 ```{r}
 litters_base = read.csv("./data/FAS_litters.csv")
@@ -79,5 +79,13 @@ litters_readr = read_csv("./data/FAS_litters.csv") #better
 
 litters_base # show all results--> difficult to read
 litters_readr # easy to read 
+```
+
+## Exporting data
+
+Export the mlb sub_table.
+```{r}
+write_csv(mlb_df, "./data/mlb_subtable.csv")
+
 ```
 

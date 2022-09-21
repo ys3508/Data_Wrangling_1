@@ -198,7 +198,8 @@ pulse_df
 
 ## comparison with Base R
 
-what about ‘read.csv’ .. ? read_csv vs. read.csv
+what about ‘read.csv’ .. ? read_csv vs. read.csv (use read_csv–\>
+better)
 
 ``` r
 litters_base = read.csv("./data/FAS_litters.csv")
@@ -338,3 +339,11 @@ litters_readr # easy to read
     ## 10 Con8  #3/5/2/2/95             28.5       NA        20       8       0       8
     ## # … with 39 more rows, and abbreviated variable names ¹​`GD18 weight`,
     ## #   ²​`GD of Birth`, ³​`Pups born alive`, ⁴​`Pups dead @ birth`, ⁵​`Pups survive`
+
+## Exporting data
+
+Export the mlb sub_table.
+
+``` r
+write_csv(mlb_df, "./data/mlb_subtable.csv")
+```
