@@ -1,0 +1,13 @@
+---
+title: "Data Tidying"
+output: github_document
+---
+# load package
+```{r}
+library(tidyverse) # tidyverse is a range of packages
+
+
+options(tibble.print_min = 5)
+
+```
+
