@@ -145,4 +145,76 @@ lotr_tidy =
 
 lotr_tidy
 ```
- 
+# Joining datasets
+
+There are four major ways join dataframes x and y:
+
+Inner: keeps data that appear in both x and y
+Left: keeps data that appear in x
+Right: keeps data that appear in y
+Full: keeps data that appear in either x or y
+Left joins are the most common, because they add data from a smaller table y into a larger table x without removing anything from x.
+
+import  data
+```{r}
+pup_data = 
+  read_csv("./data/FAS_pups.csv", show_col_types = FALSE) %>%
+  janitor::clean_names() %>%
+  mutate(
+    sex = recode(sex, `1` = "male", `2` = "female"),
+    sex = factor(sex)) 
+pup_data
+
+litter_data = 
+  read_csv("./data/FAS_litters.csv", show_col_types = FALSE) %>%
+  janitor::clean_names() %>%
+  separate(group, into = c("dose", "day_of_tx"), sep = 3) %>% #把group的con和数字分开
+  relocate(litter_number) %>%
+  mutate(
+    wt_gain = gd18_weight - gd0_weight,
+    dose = str_to_lower(dose))
+litter_data 
+
+```
+
+left join
+retains data on each pup dataset and adds data from litter data into new columns
+
+```{r}
+fas_data = 
+  left_join(pup_data, litter_data, by = "litter_number")
+
+fas_data
+
+```
+
+## another example
+
+
+import two dataset
+```{r}
+surv_os = read_csv("./survey_results/surv_os.csv") %>% 
+  janitor::clean_names() %>% 
+  rename(id = what_is_your_uni, os = what_operating_system_do_you_use)
+surv_os
+
+surv_pr_git = read_csv("./survey_results/surv_program_git.csv") %>% 
+  janitor::clean_names() %>% 
+  rename(
+    id = what_is_your_uni, 
+    prog = what_is_your_degree_program,
+    git_exp = which_most_accurately_describes_your_experience_with_git)
+surv_pr_git
+```
+
+join
+```{r}
+
+left_join(surv_os, surv_pr_git)
+inner_join(surv_os, surv_pr_git)
+anti_join(surv_os, surv_pr_git)
+anti_join(surv_pr_git, surv_os)
+
+
+```
+

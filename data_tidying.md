@@ -271,3 +271,220 @@ lotr_tidy
     ## 16 return_king     hobbit male    2673
     ## 17 return_king     man    female   268
     ## 18 return_king     man    male    2459
+
+# Joining datasets
+
+There are four major ways join dataframes x and y:
+
+Inner: keeps data that appear in both x and y Left: keeps data that
+appear in x Right: keeps data that appear in y Full: keeps data that
+appear in either x or y Left joins are the most common, because they add
+data from a smaller table y into a larger table x without removing
+anything from x.
+
+import data
+
+``` r
+pup_data = 
+  read_csv("./data/FAS_pups.csv", show_col_types = FALSE) %>%
+  janitor::clean_names() %>%
+  mutate(
+    sex = recode(sex, `1` = "male", `2` = "female"),
+    sex = factor(sex)) 
+pup_data
+```
+
+    ## # A tibble: 313 × 6
+    ##   litter_number sex   pd_ears pd_eyes pd_pivot pd_walk
+    ##   <chr>         <fct>   <dbl>   <dbl>    <dbl>   <dbl>
+    ## 1 #85           male        4      13        7      11
+    ## 2 #85           male        4      13        7      12
+    ## 3 #1/2/95/2     male        5      13        7       9
+    ## 4 #1/2/95/2     male        5      13        8      10
+    ## 5 #5/5/3/83/3-3 male        5      13        8      10
+    ## # … with 308 more rows
+
+``` r
+litter_data = 
+  read_csv("./data/FAS_litters.csv", show_col_types = FALSE) %>%
+  janitor::clean_names() %>%
+  separate(group, into = c("dose", "day_of_tx"), sep = 3) %>% #把group的con和数字分开
+  relocate(litter_number) %>%
+  mutate(
+    wt_gain = gd18_weight - gd0_weight,
+    dose = str_to_lower(dose))
+litter_data 
+```
+
+    ## # A tibble: 49 × 10
+    ##   litter…¹ dose  day_o…² gd0_w…³ gd18_…⁴ gd_of…⁵ pups_…⁶ pups_…⁷ pups_…⁸ wt_gain
+    ##   <chr>    <chr> <chr>     <dbl>   <dbl>   <dbl>   <dbl>   <dbl>   <dbl>   <dbl>
+    ## 1 #85      con   7          19.7    34.7      20       3       4       3    15  
+    ## 2 #1/2/95… con   7          27      42        19       8       0       7    15  
+    ## 3 #5/5/3/… con   7          26      41.4      19       6       0       5    15.4
+    ## 4 #5/4/2/… con   7          28.5    44.1      19       5       1       4    15.6
+    ## 5 #4/2/95… con   7          NA      NA        20       6       0       6    NA  
+    ## # … with 44 more rows, and abbreviated variable names ¹​litter_number,
+    ## #   ²​day_of_tx, ³​gd0_weight, ⁴​gd18_weight, ⁵​gd_of_birth, ⁶​pups_born_alive,
+    ## #   ⁷​pups_dead_birth, ⁸​pups_survive
+
+left join retains data on each pup dataset and adds data from litter
+data into new columns
+
+``` r
+fas_data = 
+  left_join(pup_data, litter_data, by = "litter_number")
+
+fas_data
+```
+
+    ## # A tibble: 313 × 15
+    ##   litter_n…¹ sex   pd_ears pd_eyes pd_pi…² pd_walk dose  day_o…³ gd0_w…⁴ gd18_…⁵
+    ##   <chr>      <fct>   <dbl>   <dbl>   <dbl>   <dbl> <chr> <chr>     <dbl>   <dbl>
+    ## 1 #85        male        4      13       7      11 con   7          19.7    34.7
+    ## 2 #85        male        4      13       7      12 con   7          19.7    34.7
+    ## 3 #1/2/95/2  male        5      13       7       9 con   7          27      42  
+    ## 4 #1/2/95/2  male        5      13       8      10 con   7          27      42  
+    ## 5 #5/5/3/83… male        5      13       8      10 con   7          26      41.4
+    ## # … with 308 more rows, 5 more variables: gd_of_birth <dbl>,
+    ## #   pups_born_alive <dbl>, pups_dead_birth <dbl>, pups_survive <dbl>,
+    ## #   wt_gain <dbl>, and abbreviated variable names ¹​litter_number, ²​pd_pivot,
+    ## #   ³​day_of_tx, ⁴​gd0_weight, ⁵​gd18_weight
+
+## another example
+
+import two dataset
+
+``` r
+surv_os = read_csv("./survey_results/surv_os.csv") %>% 
+  janitor::clean_names() %>% 
+  rename(id = what_is_your_uni, os = what_operating_system_do_you_use)
+```
+
+    ## Rows: 173 Columns: 2
+    ## ── Column specification ────────────────────────────────────────────────────────
+    ## Delimiter: ","
+    ## chr (2): What is your UNI?, What operating system do you use?
+    ## 
+    ## ℹ Use `spec()` to retrieve the full column specification for this data.
+    ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+
+``` r
+surv_os
+```
+
+    ## # A tibble: 173 × 2
+    ##   id          os        
+    ##   <chr>       <chr>     
+    ## 1 student_87  <NA>      
+    ## 2 student_106 Windows 10
+    ## 3 student_66  Mac OS X  
+    ## 4 student_93  Windows 10
+    ## 5 student_99  Mac OS X  
+    ## # … with 168 more rows
+
+``` r
+surv_pr_git = read_csv("./survey_results/surv_program_git.csv") %>% 
+  janitor::clean_names() %>% 
+  rename(
+    id = what_is_your_uni, 
+    prog = what_is_your_degree_program,
+    git_exp = which_most_accurately_describes_your_experience_with_git)
+```
+
+    ## Rows: 135 Columns: 3
+    ## ── Column specification ────────────────────────────────────────────────────────
+    ## Delimiter: ","
+    ## chr (3): What is your UNI?, What is your degree program?, Which most accurat...
+    ## 
+    ## ℹ Use `spec()` to retrieve the full column specification for this data.
+    ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+
+``` r
+surv_pr_git
+```
+
+    ## # A tibble: 135 × 3
+    ##   id          prog  git_exp                                                     
+    ##   <chr>       <chr> <chr>                                                       
+    ## 1 student_133 MS    Pretty smooth: needed some work to connect Git, GitHub, and…
+    ## 2 student_32  MS    Not smooth: I don't like git, I don't like GitHub, and I do…
+    ## 3 <NA>        MPH   Pretty smooth: needed some work to connect Git, GitHub, and…
+    ## 4 student_161 MPH   Not smooth: I don't like git, I don't like GitHub, and I do…
+    ## 5 student_17  PhD   Pretty smooth: needed some work to connect Git, GitHub, and…
+    ## # … with 130 more rows
+
+join
+
+``` r
+left_join(surv_os, surv_pr_git)
+```
+
+    ## Joining, by = "id"
+
+    ## # A tibble: 175 × 4
+    ##   id          os         prog  git_exp                                          
+    ##   <chr>       <chr>      <chr> <chr>                                            
+    ## 1 student_87  <NA>       MS    Pretty smooth: needed some work to connect Git, …
+    ## 2 student_106 Windows 10 Other Pretty smooth: needed some work to connect Git, …
+    ## 3 student_66  Mac OS X   MPH   Smooth: installation and connection with GitHub …
+    ## 4 student_93  Windows 10 MS    Smooth: installation and connection with GitHub …
+    ## 5 student_99  Mac OS X   MS    Smooth: installation and connection with GitHub …
+    ## # … with 170 more rows
+
+``` r
+inner_join(surv_os, surv_pr_git)
+```
+
+    ## Joining, by = "id"
+
+    ## # A tibble: 129 × 4
+    ##   id          os         prog  git_exp                                          
+    ##   <chr>       <chr>      <chr> <chr>                                            
+    ## 1 student_87  <NA>       MS    Pretty smooth: needed some work to connect Git, …
+    ## 2 student_106 Windows 10 Other Pretty smooth: needed some work to connect Git, …
+    ## 3 student_66  Mac OS X   MPH   Smooth: installation and connection with GitHub …
+    ## 4 student_93  Windows 10 MS    Smooth: installation and connection with GitHub …
+    ## 5 student_99  Mac OS X   MS    Smooth: installation and connection with GitHub …
+    ## # … with 124 more rows
+
+``` r
+anti_join(surv_os, surv_pr_git)
+```
+
+    ## Joining, by = "id"
+
+    ## # A tibble: 46 × 2
+    ##   id          os        
+    ##   <chr>       <chr>     
+    ## 1 student_86  Mac OS X  
+    ## 2 student_91  Windows 10
+    ## 3 student_24  Mac OS X  
+    ## 4 student_103 Mac OS X  
+    ## 5 student_163 Mac OS X  
+    ## # … with 41 more rows
+
+``` r
+anti_join(surv_pr_git, surv_os)
+```
+
+    ## Joining, by = "id"
+
+    ## # A tibble: 15 × 3
+    ##    id         prog  git_exp                                                     
+    ##    <chr>      <chr> <chr>                                                       
+    ##  1 <NA>       MPH   "Pretty smooth: needed some work to connect Git, GitHub, an…
+    ##  2 student_17 PhD   "Pretty smooth: needed some work to connect Git, GitHub, an…
+    ##  3 <NA>       MPH   "Pretty smooth: needed some work to connect Git, GitHub, an…
+    ##  4 <NA>       MPH   "Pretty smooth: needed some work to connect Git, GitHub, an…
+    ##  5 <NA>       MS    "Pretty smooth: needed some work to connect Git, GitHub, an…
+    ##  6 student_53 MS    "Pretty smooth: needed some work to connect Git, GitHub, an…
+    ##  7 <NA>       MS    "Smooth: installation and connection with GitHub was easy"  
+    ##  8 student_80 PhD   "Pretty smooth: needed some work to connect Git, GitHub, an…
+    ##  9 student_16 MPH   "Smooth: installation and connection with GitHub was easy"  
+    ## 10 student_98 MS    "Smooth: installation and connection with GitHub was easy"  
+    ## 11 <NA>       MS    "Pretty smooth: needed some work to connect Git, GitHub, an…
+    ## 12 <NA>       MS    "What's \"Git\" ...?"                                       
+    ## 13 <NA>       MS    "Smooth: installation and connection with GitHub was easy"  
+    ## 14 <NA>       MPH   "Pretty smooth: needed some work to connect Git, GitHub, an…
+    ## 15 <NA>       MS    "Pretty smooth: needed some work to connect Git, GitHub, an…
