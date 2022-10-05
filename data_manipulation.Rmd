@@ -2,9 +2,14 @@
 title: "Data Manipulation"
 output: github_document
 ---
-
+# load package
 ```{r}
-library(tidyverse)
+library(tidyverse) # tidyverse is a range of packages
+```
 
+# load in the FAS litters data
+```{r}
+litters_df = read_csv("./data/FAS_litters.csv")
+litters_df = janitor::clean_names(litters_df)
 ```
 

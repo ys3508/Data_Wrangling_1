@@ -30,12 +30,13 @@ litters_df
 ```
 
 ```{r}
-tail(litters_df)
+tail(litters_df) #倒数后面五行
+
 ```
 
 
 ```{r}
-# check the missing value/mean / histogram/ distribution
+# check mean
 skimr::skim(litters_df)
 ```
 
@@ -86,6 +87,60 @@ litters_readr # easy to read
 Export the mlb sub_table.
 ```{r}
 write_csv(mlb_df, "./data/mlb_subtable.csv")
+
+library(ggplot2)
+
+```
+
+
+```{r}
+df = read_excel("./Price.xlsx")
+df
+```
+```{r}
+
+ggplot(df, aes(x=Price)) + geom_histogram()
+
+ggplot(df, aes(x=Price)) + geom_density()
+
+ggplot(df, aes(x=Price)) + 
+    geom_histogram(aes(y=..density..),      # Histogram with density instead of count on y-axis
+                   colour="black", fill="white") +
+    geom_density(alpha=.2, fill="#FF6666")  #
+
+ggplot(df, aes(x=Price, fill=Gender)) + geom_density(alpha=.3)
+
+ggplot(df, aes(x=Price)) + 
+    geom_histogram(aes(y=..density..),      # Histogram with density instead of count on y-axis
+                
+                   colour="black", fill="white") +
+    geom_density(alpha=.2, fill="#FF6666")  #
+
+library(plyr)
+cdat <- ddply(df, "Gender", summarise, rating.median=median(Price))
+cdat
+
+ggplot(df, aes(x=Price, colour=Gender)) +
+    geom_density() +
+    geom_vline(data=cdat, aes(xintercept=rating.median,  colour=Gender),
+               linetype="dashed", size=1)
+
+cdat <- ddply(df, "Gender", summarise, rating.mean=mean(Price))
+cdat
+
+ggplot(df, aes(x=Price, colour=Gender)) +
+    geom_density() +
+    geom_vline(data=cdat, aes(xintercept=rating.mean,  colour=Gender),
+               linetype="dashed", size=1)
+
+cdat <- ddply(df, "Job", summarise, rating.mean=mean(Price))
+cdat
+
+ggplot(df, aes(x=Price, colour=Job)) +
+    geom_density() +
+    geom_vline(data=cdat, aes(xintercept=rating.mean,  colour=Job),
+               linetype="dashed", size=1)
+
 
 ```
 
