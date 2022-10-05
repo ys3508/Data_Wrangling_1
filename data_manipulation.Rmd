@@ -106,3 +106,11 @@ mutate(litters_df,   wt_gain = gd18_weight - gd0_weight, #muate a new variable#
   group = str_to_lower(group)) #modify the "group" variable with all lower cases
 ```
 
+# 'arrange'
+put things in orders
+
+```{r}
+head(arrange(litters_df, group, pups_born_alive), 10) # show first 10 rows
+# arrange the litters_df by group and pups_born_alive
+```
+

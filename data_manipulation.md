@@ -460,3 +460,31 @@ mutate(litters_df,   wt_gain = gd18_weight - gd0_weight, #muate a new variable#
     ## # … with 39 more rows, and abbreviated variable names ¹​gd0_weight,
     ## #   ²​gd18_weight, ³​gd_of_birth, ⁴​pups_born_alive, ⁵​pups_dead_birth,
     ## #   ⁶​pups_survive
+
+# ‘arrange’
+
+put things in orders
+
+``` r
+head(arrange(litters_df, group, pups_born_alive), 10) # show first 10 rows
+```
+
+    ## # A tibble: 10 × 8
+    ##    group litter_number   gd0_weight gd18_weight gd_of_…¹ pups_…² pups_…³ pups_…⁴
+    ##    <chr> <chr>                <dbl>       <dbl>    <dbl>   <dbl>   <dbl>   <dbl>
+    ##  1 Con7  #85                   19.7        34.7       20       3       4       3
+    ##  2 Con7  #5/4/2/95/2           28.5        44.1       19       5       1       4
+    ##  3 Con7  #5/5/3/83/3-3         26          41.4       19       6       0       5
+    ##  4 Con7  #4/2/95/3-3           NA          NA         20       6       0       6
+    ##  5 Con7  #2/2/95/3-2           NA          NA         20       6       0       4
+    ##  6 Con7  #1/2/95/2             27          42         19       8       0       7
+    ##  7 Con7  #1/5/3/83/3-3/2       NA          NA         20       9       0       9
+    ##  8 Con8  #2/2/95/2             NA          NA         19       5       0       4
+    ##  9 Con8  #1/6/2/2/95-2         NA          NA         20       7       0       6
+    ## 10 Con8  #3/6/2/2/95-3         NA          NA         20       7       0       7
+    ## # … with abbreviated variable names ¹​gd_of_birth, ²​pups_born_alive,
+    ## #   ³​pups_dead_birth, ⁴​pups_survive
+
+``` r
+# arrange the litters_df by group and pups_born_alive
+```
