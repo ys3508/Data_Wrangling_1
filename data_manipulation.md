@@ -488,3 +488,127 @@ head(arrange(litters_df, group, pups_born_alive), 10) # show first 10 rows
 ``` r
 # arrange the litters_df by group and pups_born_alive
 ```
+
+# ‘%\>%’ data processing
+
+## bad example
+
+``` r
+litters_data_raw = read_csv("./data/FAS_litters.csv",
+  col_types = "ccddiiii")
+litters_data_clean_names = janitor::clean_names(litters_data_raw)
+litters_data_selected_cols = select(litters_data_clean_names, -pups_survive)
+litters_data_with_vars = 
+  mutate(
+    litters_data_selected_cols, 
+    wt_gain = gd18_weight - gd0_weight,
+    group = str_to_lower(group))
+litters_data_with_vars_without_missing = 
+  drop_na(litters_data_with_vars, wt_gain)
+litters_data_with_vars_without_missing
+```
+
+    ## # A tibble: 31 × 8
+    ##    group litter_number gd0_weight gd18_weight gd_of_bi…¹ pups_…² pups_…³ wt_gain
+    ##    <chr> <chr>              <dbl>       <dbl>      <int>   <int>   <int>   <dbl>
+    ##  1 con7  #85                 19.7        34.7         20       3       4    15  
+    ##  2 con7  #1/2/95/2           27          42           19       8       0    15  
+    ##  3 con7  #5/5/3/83/3-3       26          41.4         19       6       0    15.4
+    ##  4 con7  #5/4/2/95/2         28.5        44.1         19       5       1    15.6
+    ##  5 mod7  #59                 17          33.4         19       8       0    16.4
+    ##  6 mod7  #103                21.4        42.1         19       9       1    20.7
+    ##  7 mod7  #3/82/3-2           28          45.9         20       5       0    17.9
+    ##  8 mod7  #5/3/83/5-2         22.6        37           19       5       0    14.4
+    ##  9 mod7  #106                21.7        37.8         20       5       0    16.1
+    ## 10 mod7  #94/2               24.4        42.9         19       7       1    18.5
+    ## # … with 21 more rows, and abbreviated variable names ¹​gd_of_birth,
+    ## #   ²​pups_born_alive, ³​pups_dead_birth
+
+``` r
+litters_data_clean = 
+  drop_na(
+    mutate(
+      select(
+        janitor::clean_names(
+          read_csv("./data/FAS_litters.csv", col_types = "ccddiiii")
+          ), 
+      -pups_survive
+      ),
+    wt_gain = gd18_weight - gd0_weight,
+    group = str_to_lower(group)
+    ),
+  wt_gain
+  )
+```
+
+## Using %\>%
+
+%\>% = “then” %\>% 快捷键：Cmd + Shift + M
+
+``` r
+litters_data = 
+  read_csv("./data/FAS_litters.csv", col_types = "ccddiiii") %>%
+  janitor::clean_names() %>%
+  select(-pups_survive) %>%
+  mutate(
+    wt_gain = gd18_weight - gd0_weight,
+    group = str_to_lower(group)) %>% 
+  drop_na(wt_gain)
+
+litters_data
+```
+
+    ## # A tibble: 31 × 8
+    ##    group litter_number gd0_weight gd18_weight gd_of_bi…¹ pups_…² pups_…³ wt_gain
+    ##    <chr> <chr>              <dbl>       <dbl>      <int>   <int>   <int>   <dbl>
+    ##  1 con7  #85                 19.7        34.7         20       3       4    15  
+    ##  2 con7  #1/2/95/2           27          42           19       8       0    15  
+    ##  3 con7  #5/5/3/83/3-3       26          41.4         19       6       0    15.4
+    ##  4 con7  #5/4/2/95/2         28.5        44.1         19       5       1    15.6
+    ##  5 mod7  #59                 17          33.4         19       8       0    16.4
+    ##  6 mod7  #103                21.4        42.1         19       9       1    20.7
+    ##  7 mod7  #3/82/3-2           28          45.9         20       5       0    17.9
+    ##  8 mod7  #5/3/83/5-2         22.6        37           19       5       0    14.4
+    ##  9 mod7  #106                21.7        37.8         20       5       0    16.1
+    ## 10 mod7  #94/2               24.4        42.9         19       7       1    18.5
+    ## # … with 21 more rows, and abbreviated variable names ¹​gd_of_birth,
+    ## #   ²​pups_born_alive, ³​pups_dead_birth
+
+``` r
+read_csv("./data/FAS_pups.csv", col_types = "ciiiii") %>%
+  janitor::clean_names() %>% 
+  filter(sex == 1) %>% 
+  select(-pd_ears) %>% 
+  mutate(pd_pivot_gt7 = pd_pivot > 7)
+```
+
+    ## # A tibble: 155 × 6
+    ##    litter_number   sex pd_eyes pd_pivot pd_walk pd_pivot_gt7
+    ##    <chr>         <int>   <int>    <int>   <int> <lgl>       
+    ##  1 #85               1      13        7      11 FALSE       
+    ##  2 #85               1      13        7      12 FALSE       
+    ##  3 #1/2/95/2         1      13        7       9 FALSE       
+    ##  4 #1/2/95/2         1      13        8      10 TRUE        
+    ##  5 #5/5/3/83/3-3     1      13        8      10 TRUE        
+    ##  6 #5/5/3/83/3-3     1      14        6       9 FALSE       
+    ##  7 #5/4/2/95/2       1      14        5       9 FALSE       
+    ##  8 #4/2/95/3-3       1      13        6       8 FALSE       
+    ##  9 #4/2/95/3-3       1      13        7       9 FALSE       
+    ## 10 #2/2/95/3-2       1      NA        8      10 TRUE        
+    ## # … with 145 more rows
+
+## Using . as placeholder
+
+You can make this more explicit by using . as a placeholder for the
+result of the preceding call
+
+``` r
+litters_data = 
+  read_csv("./data/FAS_litters.csv", col_types = "ccddiiii") %>%
+  janitor::clean_names(dat = .) %>%
+  select(.data = ., -pups_survive) %>%
+  mutate(.data = .,
+    wt_gain = gd18_weight - gd0_weight,
+    group = str_to_lower(group)) %>% 
+  drop_na(data = ., wt_gain)
+```
