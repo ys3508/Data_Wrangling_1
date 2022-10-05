@@ -11,5 +11,55 @@ library(tidyverse) # tidyverse is a range of packages
 ```{r}
 litters_df = read_csv("./data/FAS_litters.csv")
 litters_df = janitor::clean_names(litters_df)
+litters_df
+```
+
+# 'select'
+
+## choose/remove some columns
+
+```{r}
+select(litters_df, group, gd0_weight)
+
+select(litters_df, - gd0_weight)
+
+```
+
+## selct a range column
+```{r}
+select(litters_df, group, gd0_weight:gd_of_birth)
+```
+
+## renaming columns
+```{r}
+# in one step
+select(litters_df, GROUP = group, LITTER_NUMBER = litter_number)
+
+# in multiple steps
+rename(litters_df, GROUP = group, LITTER_NUMBER = litter_number)
+```
+
+## select helpers
+下面打?select_helpers
+
+## select using keywords
+```{r}
+select(litters_df, starts_with("gd"))
+select(litters_df, ends_with("ht"))
+select(litters_df, contains("ht"))
+```
+
+## sequencing
+把litter_number放在最前面但是保留其他的columns
+everything(), which is handy for reorganizing columns without discarding anything
+```{r}
+select(litters_df, litter_number, everything())
+
+```
+
+OR
+```{r}
+relocate(litters_df, litter_number)
+
 ```
 
