@@ -22,9 +22,7 @@ options(tibble.print_min = 5)
 
 # pivot_longer
 
-In data import, we used the haven package to load the PULSE biomarkers
-dataset from a .sas7bdat. Let’s reload those data and take a closer
-look:
+load the dataset
 
 ``` r
 pulse_df = 
@@ -44,9 +42,7 @@ pulse_df
     ## 5 10035  60.4 male             4             0             1             2
     ## # … with 1,082 more rows
 
-With our new understanding of tidy data, we quickly recognize a problem:
-the BDI score is spread across four columns, which correspond to four
-observation times. We can fix this problem using pivot_longer:
+wide format to long format…
 
 ``` r
 pulse_tidy_data = 
@@ -69,10 +65,7 @@ pulse_tidy_data
     ## 5 10015  72.5 male  bdi_score_bl      6
     ## # … with 4,343 more rows
 
-去掉“vist”值的前缀 This looks much better! However, now visit is an
-issue. The original column names were informative but we probably don’t
-need to keep the bdi_score\_ prefix in each case. I’ll use an additional
-option in pivot_longer to address this:
+去掉“vist”值的前缀 remove prefix
 
 ``` r
 pulse_tidy_data = 
@@ -97,6 +90,8 @@ pulse_tidy_data
     ## # … with 4,343 more rows
 
 ## using $>$
+
+rewrite, combine, and extend(to add a mutate)
 
 ``` r
 pulse_df = 
@@ -176,6 +171,8 @@ litters_wide
 
 # pivot_wider
 
+make up some data
+
 ``` r
 analysis_result = tibble(
   group = c("treatment", "treatment", "placebo", "placebo"),
@@ -194,6 +191,8 @@ analysis_result
     ## 3 placebo   pre     3.5
     ## 4 placebo   post    4
 
+long format to wide format
+
 ``` r
 pivot_wider(
   analysis_result, 
@@ -206,3 +205,69 @@ pivot_wider(
     ##   <chr>     <dbl> <dbl>
     ## 1 treatment   4       8
     ## 2 placebo     3.5     4
+
+# Binding rows
+
+import data
+
+``` r
+fellowship_ring = 
+  readxl::read_excel("./data/LotR_Words.xlsx", range = "B3:D6") %>%
+  mutate(movie = "fellowship_ring")
+fellowship_ring
+```
+
+    ## # A tibble: 3 × 4
+    ##   Race   Female  Male movie          
+    ##   <chr>   <dbl> <dbl> <chr>          
+    ## 1 Elf      1229   971 fellowship_ring
+    ## 2 Hobbit     14  3644 fellowship_ring
+    ## 3 Man         0  1995 fellowship_ring
+
+``` r
+two_towers = 
+  readxl::read_excel("./data/LotR_Words.xlsx", range = "F3:H6") %>%
+  mutate(movie = "two_towers")
+
+return_king = 
+  readxl::read_excel("./data/LotR_Words.xlsx", range = "J3:L6") %>%
+  mutate(movie = "return_king")
+```
+
+stack datasets together
+
+``` r
+lotr_tidy = 
+  bind_rows(fellowship_ring, two_towers, return_king) %>%
+  janitor::clean_names() %>%
+  pivot_longer(
+    female:male,
+    names_to = "gender", #character vectors
+    values_to = "words") %>% #numberic vectors
+  mutate(race = str_to_lower(race)) %>% #全换成小写
+  select(movie, everything()) #movie在第一列但保留其他columns
+
+lotr_tidy
+```
+
+    ## # A tibble: 18 × 4
+    ##    movie           race   gender words
+    ##    <chr>           <chr>  <chr>  <dbl>
+    ##  1 fellowship_ring elf    female  1229
+    ##  2 fellowship_ring elf    male     971
+    ##  3 fellowship_ring hobbit female    14
+    ##  4 fellowship_ring hobbit male    3644
+    ##  5 fellowship_ring man    female     0
+    ##  6 fellowship_ring man    male    1995
+    ##  7 two_towers      elf    female   331
+    ##  8 two_towers      elf    male     513
+    ##  9 two_towers      hobbit female     0
+    ## 10 two_towers      hobbit male    2463
+    ## 11 two_towers      man    female   401
+    ## 12 two_towers      man    male    3589
+    ## 13 return_king     elf    female   183
+    ## 14 return_king     elf    male     510
+    ## 15 return_king     hobbit female     2
+    ## 16 return_king     hobbit male    2673
+    ## 17 return_king     man    female   268
+    ## 18 return_king     man    male    2459

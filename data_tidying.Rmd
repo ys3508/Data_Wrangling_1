@@ -13,7 +13,9 @@ options(tibble.print_min = 5)
 
 
 # pivot_longer
-In data import, we used the haven package to load the PULSE biomarkers dataset from a .sas7bdat. Let’s reload those data and take a closer look:
+
+load the dataset
+
 ```{r}
 pulse_df = 
   haven::read_sas("./data/public_pulse_data.sas7bdat") %>%
@@ -22,7 +24,7 @@ pulse_df =
 pulse_df
 ```
 
-With our new understanding of tidy data, we quickly recognize a problem: the BDI score is spread across four columns, which correspond to four observation times. We can fix this problem using pivot_longer:
+wide format to long format...
 
 ```{r}
 pulse_tidy_data = 
@@ -35,8 +37,7 @@ pulse_tidy_data =
 pulse_tidy_data
 ```
 
-去掉“vist”值的前缀
-This looks much better! However, now visit is an issue. The original column names were informative but we probably don’t need to keep the bdi_score_ prefix in each case. I’ll use an additional option in pivot_longer to address this:
+去掉“vist”值的前缀 remove prefix
 
 ```{r}
 pulse_tidy_data = 
@@ -51,6 +52,7 @@ pulse_tidy_data
 ```
 
 ## using $>$ 
+rewrite, combine, and extend(to add a mutate)
 ```{r}
 pulse_df = 
   haven::read_sas("./data/public_pulse_data.sas7bdat") %>% #load dataset
@@ -90,6 +92,7 @@ litters_wide
 
 # pivot_wider
 
+make up some data
 
 ```{r}
 analysis_result = tibble(
@@ -102,7 +105,7 @@ analysis_result
 
 ```
 
-
+long format to wide format
 ```{r}
 pivot_wider(
   analysis_result, 
@@ -110,3 +113,36 @@ pivot_wider(
   values_from = "mean")
 ```
 
+# Binding rows
+
+import data
+```{r}
+fellowship_ring = 
+  readxl::read_excel("./data/LotR_Words.xlsx", range = "B3:D6") %>%
+  mutate(movie = "fellowship_ring")
+fellowship_ring
+
+two_towers = 
+  readxl::read_excel("./data/LotR_Words.xlsx", range = "F3:H6") %>%
+  mutate(movie = "two_towers")
+
+return_king = 
+  readxl::read_excel("./data/LotR_Words.xlsx", range = "J3:L6") %>%
+  mutate(movie = "return_king")
+```
+
+ stack datasets together
+```{r}
+lotr_tidy = 
+  bind_rows(fellowship_ring, two_towers, return_king) %>%
+  janitor::clean_names() %>%
+  pivot_longer(
+    female:male,
+    names_to = "gender", #character vectors
+    values_to = "words") %>% #numberic vectors
+  mutate(race = str_to_lower(race)) %>% #全换成小写
+  select(movie, everything()) #movie在第一列但保留其他columns
+
+lotr_tidy
+```
+ 
