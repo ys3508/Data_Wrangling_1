@@ -11,3 +11,81 @@ options(tibble.print_min = 5)
 
 ```
 
+
+# pivot_longer
+In data import, we used the haven package to load the PULSE biomarkers dataset from a .sas7bdat. Let’s reload those data and take a closer look:
+```{r}
+pulse_df = 
+  haven::read_sas("./data/public_pulse_data.sas7bdat") %>%
+  janitor::clean_names()
+
+pulse_df
+```
+
+With our new understanding of tidy data, we quickly recognize a problem: the BDI score is spread across four columns, which correspond to four observation times. We can fix this problem using pivot_longer:
+
+```{r}
+pulse_tidy_data = 
+  pivot_longer(
+    pulse_df, #dataset
+    bdi_score_bl:bdi_score_12m, #column range
+    names_to = "visit", #new column name
+    values_to = "bdi") # value
+
+pulse_tidy_data
+```
+
+去掉“vist”值的前缀
+This looks much better! However, now visit is an issue. The original column names were informative but we probably don’t need to keep the bdi_score_ prefix in each case. I’ll use an additional option in pivot_longer to address this:
+
+```{r}
+pulse_tidy_data = 
+  pivot_longer(
+    pulse_df, 
+    bdi_score_bl:bdi_score_12m,
+    names_to = "visit", 
+    names_prefix = "bdi_score_", #remove prefix
+    values_to = "bdi")
+
+pulse_tidy_data
+```
+
+## using $>$ 
+```{r}
+pulse_df = 
+  haven::read_sas("./data/public_pulse_data.sas7bdat") %>% #load dataset
+  janitor::clean_names() %>%  # clean dataset
+  pivot_longer(
+    bdi_score_bl:bdi_score_12m,
+    names_to = "visit", 
+    names_prefix = "bdi_score_",
+    values_to = "bdi") %>% #For tidying single tables
+  relocate(visit) %>% #list "visit" to be the first column
+  mutate(
+    visit = replace(visit, visit == "bl", "00m"), # replace the value "bl" by "00m" in "visit" column
+    visit = factor(visit)) %>% # turns "visit" into factor
+  arrange(id, visit) #arrange by "id" and "visit"
+
+print(pulse_df, n = 12) #print the dataset with 12 rows
+```
+
+```{r, show_col_types = FALSE}
+
+litters_wide = 
+  read_csv("./data/FAS_litters.csv", show_col_types = FALSE) %>%
+  janitor::clean_names()
+litters_wide
+
+litters_wide = 
+  read_csv("./data/FAS_litters.csv", show_col_types = FALSE) %>%
+  janitor::clean_names()%>%
+  select(litter_number, ends_with("weight")) %>% 
+  pivot_longer(
+    gd0_weight:gd18_weight,
+    names_to = "gd", 
+    values_to = "weight") %>% 
+  mutate(gd = recode(gd, "gd0_weight" = 0, "gd18_weight" = 18))
+litters_wide
+```
+
+
