@@ -98,3 +98,11 @@ Remove NAS only in column "gd0_weight"
 ```{r}
 drop_na(litters_df, gd0_weight) 
 ```
+# 'mutate'
+
+modify old variables or create new variables
+```{r}
+mutate(litters_df,   wt_gain = gd18_weight - gd0_weight, #muate a new variable#
+  group = str_to_lower(group)) #modify the "group" variable with all lower cases
+```
+
